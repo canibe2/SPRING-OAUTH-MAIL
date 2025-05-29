@@ -6,7 +6,7 @@ public interface ResponseMessage {
 
     String VALIDATION_FAIL = "Validation failed.";
 
-    String DUPLICATE = "Duplicate Id.";
+    String DUPLICATE_ID = "Duplicate Id.";
 
     String SIGN_IN_FAIL = "Login information mismatch.";
 
