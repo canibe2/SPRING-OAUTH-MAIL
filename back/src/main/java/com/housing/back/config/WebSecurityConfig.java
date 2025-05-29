@@ -25,10 +25,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @EnableWebSecurity // 시큐리티 활성화
 @Configuration // 스프링 설정 클래스
 @Configurable // 스프링이 아닌 객체에도 의존성 주입 가능
-@RequiredArgsConstructor
 public class WebSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -37,8 +37,8 @@ public class WebSecurityConfig {
     protected SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(CsrfConfigurer::disable)
-                .httpBasic(HttpBasicConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
+                .httpBasic(httpBasic -> httpBasic.disable())
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request -> request
@@ -60,8 +60,8 @@ public class WebSecurityConfig {
 
         corsConfiguration.addAllowedOrigin("*");
         corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addExposedHeader("*");
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         source.registerCorsConfiguration("/api/v1/**", corsConfiguration);

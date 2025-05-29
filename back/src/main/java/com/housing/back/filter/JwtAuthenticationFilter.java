@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+
     private final UserRepository userRepository;
 
     @Override
@@ -52,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             UserEntity userEntity = userRepository.findByUserId(userId);
 
-            String role = userEntity.getRole(); // 권한 지정 ROLE_USER , ROLE_ADMIN
+            String role = "ROLE_" + userEntity.getRole(); // 권한 지정 ROLE_USER , ROLE_ADMIN
 
             List<GrantedAuthority> authorities = new ArrayList<>();
 
@@ -60,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
-            AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userId, null,
+            AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userEntity, null,
                     authorities);
 
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
