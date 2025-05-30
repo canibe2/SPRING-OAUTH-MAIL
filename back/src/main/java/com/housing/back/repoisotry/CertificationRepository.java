@@ -8,4 +8,6 @@ import com.housing.back.entity.CertificationEntity;
 @Repository
 public interface CertificationRepository extends JpaRepository<CertificationEntity, String> {
 
+    CertificationEntity findByUserId(String userId);
+
 }

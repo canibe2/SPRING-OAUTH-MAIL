@@ -39,6 +39,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
 
+            String requestURI = request.getRequestURI();
+
+            if (requestURI.startsWith("/api/v1/auth/")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             String token = parseBearerToken(request);
             if (token == null) {
                 filterChain.doFilter(request, response);
@@ -61,7 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
-            AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userEntity, null,
+            AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userId, null,
                     authorities);
 
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -72,6 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             e.printStackTrace();
+            return;
 
         }
         filterChain.doFilter(request, response);
