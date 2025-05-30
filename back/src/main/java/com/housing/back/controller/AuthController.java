@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.housing.back.dto.request.auth.CheckCertificationRequestDto;
 import com.housing.back.dto.request.auth.EmailCertificationRequestDto;
 import com.housing.back.dto.request.auth.IdCheckRequestDto;
+import com.housing.back.dto.request.auth.SignUpRequestDto;
 import com.housing.back.dto.response.auth.CheckCertificationResponseDto;
 import com.housing.back.dto.response.auth.EmailCertificationResponseDto;
 import com.housing.back.dto.response.auth.IdCheckResponseDto;
+import com.housing.back.dto.response.auth.SignUpResponseDto;
 import com.housing.back.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -17,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,5 +52,14 @@ public class AuthController {
 
         ResponseEntity<? super CheckCertificationResponseDto> response = authService.checkCertification(requestBody);
         return response;
+    }
+
+    @PostMapping("/sign-up")
+    public ResponseEntity<? super SignUpResponseDto> signUp(@RequestBody @Valid SignUpRequestDto requestBody) {
+
+        ResponseEntity<? super SignUpResponseDto> response = authService.signUp(requestBody);
+
+        return response;
+
     }
 }
