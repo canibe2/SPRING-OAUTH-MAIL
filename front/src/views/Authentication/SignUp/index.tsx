@@ -1,6 +1,6 @@
 import InputBox from 'components/InputBox'
 import React, { ChangeEvent, useRef, useState } from 'react'
-
+import './style.css';
 export default function SignUp() {
 
     const idRef = useRef<HTMLInputElement | null>(null);
@@ -27,6 +27,9 @@ export default function SignUp() {
     const [passwordCheckMessage,setPasswordCheckMessage] = useState<string>('');
     const [emailMessage,setEmailMessage] = useState<string>('');
     const [certificationNumberMessage,setCertificationNumberMessage] = useState<string>('');
+
+    const signUpButtonClass = id && password && passwordCheck && email && certificationNumber ?
+                                            'primary-button-lg' : 'disable-button-lg';
 
     const onIdChangeHandler = (event : ChangeEvent<HTMLInputElement>) => {
 
@@ -127,7 +130,7 @@ export default function SignUp() {
                         <InputBox ref={certificationNumberRef}  title='인증번호' placeholder='인증번호를 입력해주세요' type='text' value={certificationNumber} onChange={onCertificationNumberChangeHandler} isErrorMessage={isCertificationNumberError} message={certificationNumberMessage}buttonTitle='인증번호확인' onButtonClick={onCertificationNumberButtonClickHandler} onKeyDown={onCertificationNumberKeyDownHandler}/>
                     </div>
                     <div className='sign-up-content-button-box'>
-                        <div className='disable-button-lg full-width'>{'회원가입'}</div>
+                        <div className={`${signUpButtonClass} full-width`}>{'회원가입'}</div>
                         <div className='text-link-lg full-width'>{'로그인'}</div>
                     </div>
                     <div></div>
