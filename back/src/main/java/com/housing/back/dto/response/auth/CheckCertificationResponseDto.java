@@ -24,7 +24,7 @@ public class CheckCertificationResponseDto extends ResponseDto {
 
     public static ResponseEntity<ResponseDto> certificationFail() {
 
-        ResponseDto responseBody = new ResponseDto(ResponseCode.VALIDATION_FAIL, ResponseMessage.VALIDATION_FAIL);
+        ResponseDto responseBody = new ResponseDto(ResponseCode.CERTIFICATION_FAIL, ResponseMessage.CERTIFICATION_FAIL);
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
 

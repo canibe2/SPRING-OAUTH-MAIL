@@ -2,10 +2,9 @@ import InputBox from 'components/InputBox'
 import React, { ChangeEvent, useRef, useState } from 'react'
 import './style.css';
 import { useNavigate } from 'react-router-dom';
-import { EmailCertificationRequestDto, IdCheckRequestDto } from 'apis/request/auth';
-import { emailCertificationRequest, idCheckRequest } from 'apis';
-import { EmailCertificationResponseDto, IdCheckResponseDto } from 'apis/response/auth';
-import { ResponseDto } from 'apis/response';
+import { CheckCertificationRequestDto, EmailCertificationRequestDto, IdCheckRequestDto, SignUpRequestDto } from 'apis/request/auth';
+import { checkCertificationRequest, emailCertificationRequest, idCheckRequest, signUpRequest } from 'apis';
+import { CheckCertificationResponseDto, EmailCertificationResponseDto, IdCheckResponseDto, SignUpResponseDto } from 'apis/response/auth';
 import { ResponseCode } from 'types/enums';
 import { ResponseBody } from 'types';
 
@@ -38,10 +37,14 @@ export default function SignUp() {
 
     const [isIdCheck,setIdCheck] = useState<boolean>(false);
 
+    const [isCertificationCheck, setCertificationCheck] = useState<boolean>(false);
+
     const signUpButtonClass = id && password && passwordCheck && email && certificationNumber ?
                                             'primary-button-lg' : 'disable-button-lg';
 
     const emailPattern =/^[a-zA-Z0-9]*@([-.]?[a-zA-Z0-9])*\.[a-zA-Z]{2,4}$/;
+
+    const passwordPattern = /^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{8,13}$/;
 
     const navigate = useNavigate();
 
@@ -85,6 +88,50 @@ export default function SignUp() {
         setEmailMessage('인증번호가 전송되었습니다.');
     };
 
+    const checkCertificationResponse = (responseBody : ResponseBody<CheckCertificationResponseDto>) => {
+
+        if(!responseBody) return;
+
+        const {code} = responseBody;
+
+        if(code === ResponseCode.VALIDATION_FAIL) alert('아이디, 이메일, 인증번호를 모두 입력하세요.');
+        if(code === ResponseCode.CERTIFICATION_FAIL) {
+            setCertificationNumberError(true);
+            setCertificationNumberMessage('인증번호가 일치하지 않습니다.');
+            setCertificationCheck(false);
+        }
+        if (code === ResponseCode.DATABASE_ERROR) alert('데이터베이스 오류입니다.');
+        if (code !== ResponseCode.SUCCESS) return;
+
+            setCertificationNumberError(false);
+            setCertificationNumberMessage('인증번호가 일치합니다.');
+            setCertificationCheck(true);
+    }
+
+    const signUpResponse = (responseBody : ResponseBody<SignUpResponseDto>) => {
+
+        if(!responseBody) return;
+
+        const {code} = responseBody;
+
+        if(code === ResponseCode.VALIDATION_FAIL) alert('모두 입력하세요.');
+            if(code === ResponseCode.DUPLICATE_ID) {
+            setIdError(true);
+            setIdMessage('이미 사용중인 아이디입니다.');
+            setIdCheck(false);
+        }
+        if(code === ResponseCode.CERTIFICATION_FAIL) {
+            setCertificationNumberError(true);
+            setCertificationNumberMessage('인증번호가 일치하지 않습니다.');
+            setCertificationCheck(false);
+        }
+        if (code === ResponseCode.DATABASE_ERROR) alert('데이터베이스 오류입니다.');
+        if (code !== ResponseCode.SUCCESS) return;
+
+        navigate('/auth/sign-in');
+        alert('회원가입이 완료되었습니다. 로그인해주세요.');
+    }
+
     const onIdChangeHandler = (event : ChangeEvent<HTMLInputElement>) => {
 
         const { value } =  event.target;
@@ -105,6 +152,7 @@ export default function SignUp() {
         const { value } =  event.target;
         setPasswordCheck(value);
         setPasswordCheckMessage('');
+        setPasswordCheckError(false);
     };
 
     const onEmailChangeHandler = (event : ChangeEvent<HTMLInputElement>) => {
@@ -119,6 +167,7 @@ export default function SignUp() {
         const { value } =  event.target;
         setCertificationNumber(value);
         setCertificationNumberMessage('');
+        setCertificationCheck(false);
     };
 
     const onIdButtonClickHandler = () => {
@@ -129,7 +178,7 @@ export default function SignUp() {
     };
 
     const onEmailButtonClickHandler = () => {
-        if(!id && !email) return;
+        if(!id || !email) return;
 
         const checkedEmail = emailPattern.test(email);
     
@@ -141,20 +190,59 @@ export default function SignUp() {
         
         const requestBody : EmailCertificationRequestDto = {id,email};
         emailCertificationRequest(requestBody).then(emailCertificationResponse);
+
+        setEmailError(false);
+        setEmailMessage('인증번호 전송중...');
     };
 
     const onCertificationNumberButtonClickHandler = () => {
+
+        if(!id || !email || !certificationNumber) return;
+
+        const requestBody : CheckCertificationRequestDto = {id, email, certificationNumber};
+
+        checkCertificationRequest(requestBody)
+        .then(checkCertificationResponse);
 
     };
 
     const onSignUpButtonClickHandler = () => {
 
+        if(!id || !password || !email || !certificationNumber) return;
 
+        if(!isIdCheck) {
+            alert('중복확인은 필수입니다.');
+            return;
+        }
+
+        const checkedPassword = passwordPattern.test(password);
+
+        if(!checkedPassword) {
+
+            setPasswordError(true);
+            setPasswordMessage('비밀번호는 영문, 숫자 조합으로 8~13자리여야 합니다.');
+            return;
+        }
+
+        if(password !== passwordCheck) {
+            setPasswordCheckError(true);
+            setPasswordCheckMessage('비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        if(!isCertificationCheck) {
+            alert('이메일 인증은 필수입니다.');
+            return;
+        }
+
+        const requestBody : SignUpRequestDto = {id, password, email,certificationNumber};
+
+        signUpRequest(requestBody).then(signUpResponse);
     };
 
     const onSignInButtonClickHandler = () => {
         navigate('/auth/sign-in');
-    }
+    };
 
     const onIdKeyDownHandler= (event: React.KeyboardEvent<HTMLInputElement>) => {
         if(event.key !== 'Enter') return;
@@ -164,7 +252,7 @@ export default function SignUp() {
     const onPasswordKeyDownHandler= (event: React.KeyboardEvent<HTMLInputElement>) => {
         if(event.key !== 'Enter') return;
         if(!passwordCheckRef.current) return;
-        passwordCheckRef.current.focus();
+        passwordCheckRef.current?.focus();
     };
 
     const onPasswordCheckKeyDownHandler= (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -218,3 +306,4 @@ export default function SignUp() {
     </div>
   )
 }
+

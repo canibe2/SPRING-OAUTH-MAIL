@@ -41,6 +41,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String requestURI = request.getRequestURI();
 
+            if (requestURI.startsWith("/swagger-ui/")
+                    || requestURI.startsWith("/swagger-resources/")
+                    || requestURI.startsWith("/v3/api-docs/")
+                    || requestURI.startsWith("/webjars/")
+                    || requestURI.startsWith("/favicon.ico")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             if (requestURI.startsWith("/api/v1/auth/")) {
                 filterChain.doFilter(request, response);
                 return;
@@ -60,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             UserEntity userEntity = userRepository.findByUserId(userId);
 
-            String role = "ROLE_" + userEntity.getRole(); // 권한 지정 ROLE_USER , ROLE_ADMIN
+            String role = userEntity.getRole(); // 권한 지정 ROLE_USER , ROLE_ADMIN
 
             List<GrantedAuthority> authorities = new ArrayList<>();
 
@@ -79,8 +88,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return;
-
+            filterChain.doFilter(request, response);
         }
         filterChain.doFilter(request, response);
 
