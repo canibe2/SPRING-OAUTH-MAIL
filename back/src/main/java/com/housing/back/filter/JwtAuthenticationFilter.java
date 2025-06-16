@@ -39,22 +39,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
 
-            String requestURI = request.getRequestURI();
-
-            if (requestURI.startsWith("/swagger-ui/")
-                    || requestURI.startsWith("/swagger-resources/")
-                    || requestURI.startsWith("/v3/api-docs/")
-                    || requestURI.startsWith("/webjars/")
-                    || requestURI.startsWith("/favicon.ico")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            if (requestURI.startsWith("/api/v1/auth/")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
             String token = parseBearerToken(request);
             if (token == null) {
                 filterChain.doFilter(request, response);
@@ -88,10 +72,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             e.printStackTrace();
-            filterChain.doFilter(request, response);
         }
-        filterChain.doFilter(request, response);
 
+        filterChain.doFilter(request, response);
     }
 
     // token 꺼내기

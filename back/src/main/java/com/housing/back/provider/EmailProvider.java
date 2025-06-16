@@ -20,6 +20,7 @@ public class EmailProvider {
         try {
 
             MimeMessage message = javaMailSender.createMimeMessage();
+
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
 
             String htmlContent = getCertificationMessage(certificationNumber);

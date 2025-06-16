@@ -1,5 +1,6 @@
 package com.housing.back.dto.response;
 
+import org.apache.commons.lang3.RegExUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -30,5 +31,4 @@ public class ResponseDto {
         ResponseDto responseBody = new ResponseDto(ResponseCode.VALIDATION_FAIL, ResponseMessage.VALIDATION_FAIL);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
     }
-
 };
