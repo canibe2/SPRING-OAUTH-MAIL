@@ -10,6 +10,7 @@ function App() {
   return (
     <CookiesProvider>
     <Routes>
+      <Route path="/" element={<></>} />
       <Route path='/auth'>
         <Route path='sign-up' element={<SignUp/>}/>
         <Route path='sign-in' element={<SignIn/>}/>
