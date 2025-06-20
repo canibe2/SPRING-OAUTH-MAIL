@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -17,6 +18,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.housing.back.filter.JwtAuthenticationFilter;
+import com.housing.back.handler.OAuth2SuccessHandler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +33,10 @@ public class WebSecurityConfig {
 
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+        private final DefaultOAuth2UserService oAuth2UserService;
+
+        private final OAuth2SuccessHandler oAuth2SuccessHandler;
+
         @Bean
         protected SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
 
@@ -40,15 +46,23 @@ public class WebSecurityConfig {
                                 .sessionManagement(sessionManagement -> sessionManagement
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(request -> request
-                                                .requestMatchers("/", "/api/v1/auth/**").permitAll()
+                                                .requestMatchers("/", "/api/v1/auth/**", "/oauth2/**").permitAll()
                                                 .requestMatchers("/api/v1/user/**").hasRole("USER")
                                                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
+                                .oauth2Login(oauth2 -> oauth2
+                                                .authorizationEndpoint(
+                                                                endpoint -> endpoint.baseUri("/api/v1/auth/oauth2"))
+                                                .redirectionEndpoint(
+                                                                endpoint -> endpoint.baseUri("/oauth2/callback/*"))
+                                                .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
+                                                .successHandler(oAuth2SuccessHandler))
                                 .exceptionHandling(exceptionHandling -> exceptionHandling
                                                 .authenticationEntryPoint(new FailedAuthenticationEntryPoint()))
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return httpSecurity.build();
+
         }
 
         @Bean
@@ -59,6 +73,7 @@ public class WebSecurityConfig {
                 corsConfiguration.addAllowedOrigin("*");
                 corsConfiguration.addAllowedMethod("*");
                 corsConfiguration.addAllowedHeader("*");
+                corsConfiguration.setAllowCredentials(true);
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
